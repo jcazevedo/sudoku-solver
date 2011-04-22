@@ -16,10 +16,12 @@ int main()
             puzzle->set_value(i, j, v);
         }
 
+    printf("Original puzzle:\n");
     puzzle->print();
 
     solver->solve(*puzzle);
 
+    printf("\nSolved puzzle:\n");
     puzzle->print();
 
     return 0;
