@@ -12,7 +12,7 @@ sudoku_puzzle::~sudoku_puzzle()
 {
 }
 
-int sudoku_puzzle::get_value(int row, int column)
+int sudoku_puzzle::get_value(int row, int column) const
 {
     return this->matrix[row][column];
 }
@@ -22,7 +22,7 @@ void sudoku_puzzle::set_value(int row, int column, int value)
     this->matrix[row][column] = value;
 }
 
-void sudoku_puzzle::print()
+void sudoku_puzzle::print() const
 {
     for (int i = 0; i < sudoku_puzzle::MATRIX_SIZE; i++)
         printf("+---");
@@ -42,3 +42,28 @@ void sudoku_puzzle::print()
         printf("+\n");
     }
 }
+
+int sudoku_puzzle::get_square(int row, int column)
+{
+    if (row < 3 && column < 3)
+        return 0;
+    else if (row < 3 && column < 6)
+        return 1;
+    else if (row < 3 && column < 9)
+        return 2;
+    else if (row < 6 && column < 3)
+        return 3;
+    else if (row < 6 && column < 6)
+        return 4;
+    else if (row < 6 && column < 9)
+        return 5;
+    else if (row < 9 && column < 3)
+        return 6;
+    else if (row < 9 && column < 6)
+        return 7;
+    else if (row < 9 && column < 9)
+        return 8;
+
+    return -1;
+}
+
