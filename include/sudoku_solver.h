@@ -7,7 +7,7 @@ class sudoku_solver
 {
 public:
     virtual bool solve(sudoku_puzzle & puzzle) = 0;
-    bool solved(const sudoku_puzzle & puzzle);
+    bool         solved(const sudoku_puzzle & puzzle);
 };
 
 #endif
