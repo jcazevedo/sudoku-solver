@@ -24,5 +24,8 @@ int main()
     printf("\nSolved puzzle:\n");
     puzzle->print();
 
+    delete puzzle;
+    delete solver;
+
     return 0;
 }
