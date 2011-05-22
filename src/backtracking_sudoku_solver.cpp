@@ -13,26 +13,23 @@ backtracking_sudoku_solver::~backtracking_sudoku_solver()
 
 void backtracking_sudoku_solver::reset_candidates()
 {
-    for (int i = 0; i < sudoku_puzzle::MATRIX_SIZE; i++)
-    {
-        row_fill[i].clear();
-        column_fill[i].clear();
-        square_fill[i].clear();
+    int n = sudoku_puzzle::MATRIX_SIZE;
 
-        for (int j = 1; j <= 9; j++)
-        {
-            row_fill[i].insert(j);
-            column_fill[i].insert(j);
-            square_fill[i].insert(j);
-        }
+    for (int i = 0; i < n; i++)
+    {
+        row_fill[i] = (1<<n)-1;
+        column_fill[i] = (1<<n)-1;
+        square_fill[i] = (1<<n)-1;
     }
 }
 
 void backtracking_sudoku_solver::setup_candidates(const sudoku_puzzle & puzzle)
 {
     this->reset_candidates();
-    for (int i = 0; i < sudoku_puzzle::MATRIX_SIZE; i++)
-        for (int j = 0; j < sudoku_puzzle::MATRIX_SIZE; j++)
+
+    int n = sudoku_puzzle::MATRIX_SIZE;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
         {
             int v = puzzle.get_value(i, j);
             if (v != 0)
@@ -60,17 +57,21 @@ int backtracking_sudoku_solver::get_next_column(int r, int c)
     return c+1;
 }
 
-set<int> backtracking_sudoku_solver::get_candidates(int r, int c)
+vector<int> backtracking_sudoku_solver::get_candidates(int r, int c)
 {
     int sq = sudoku_puzzle::get_square(r, c);
+    int v = row_fill[r]&column_fill[c]&square_fill[sq];
+    int n = 1;
 
-    set<int> values;
-    for (set<int>::iterator it = row_fill[r].begin(); 
-         it != row_fill[r].end(); 
-         it++)
-        if (column_fill[c].find(*it) != column_fill[c].end() &&
-            square_fill[sq].find(*it) != square_fill[sq].end())
-            values.insert(*it);
+    vector<int> values;
+
+    while (v)
+    {
+        if (v & 1)
+            values.push_back(n);
+        v >>= 1;
+        n++;
+    }
 
     return values;
 }
@@ -78,17 +79,20 @@ set<int> backtracking_sudoku_solver::get_candidates(int r, int c)
 void backtracking_sudoku_solver::add_to_candidates(int r, int c, int v)
 {
     int sq = sudoku_puzzle::get_square(r, c);
-    row_fill[r].insert(v);
-    column_fill[c].insert(v);
-    square_fill[sq].insert(v);
+
+    row_fill[r] |= (1<<(v-1));
+    column_fill[c] |= (1<<(v-1));
+    square_fill[sq] |= (1<<(v-1));
 }
 
 void backtracking_sudoku_solver::remove_from_candidates(int r, int c, int v)
 {
+    int n = (1<<sudoku_puzzle::MATRIX_SIZE)-1;
     int sq = sudoku_puzzle::get_square(r, c);
-    row_fill[r].erase(v);
-    column_fill[c].erase(v);
-    square_fill[sq].erase(v);
+
+    row_fill[r] &= (n^(1<<(v-1)));
+    column_fill[c] &= (n^(1<<(v-1)));
+    square_fill[sq] &= (n^(1<<(v-1)));
 }
 
 bool backtracking_sudoku_solver::solve_aux(sudoku_puzzle & puzzle, int r, int c)
@@ -102,13 +106,12 @@ bool backtracking_sudoku_solver::solve_aux(sudoku_puzzle & puzzle, int r, int c)
 
     if (puzzle.get_value(r, c) == 0)
     {
-        set<int> values = this->get_candidates(r, c);
+        vector<int> values = this->get_candidates(r, c);
+        int n = values.size();
 
-        for (set<int>::iterator it = values.begin();
-             it != values.end();
-             it++)
+        for (int i = 0; i < n; i++)
         {
-            int v = *it;
+            int v = values[i];
             
             puzzle.set_value(r, c, v);
             this->remove_from_candidates(r, c, v);
